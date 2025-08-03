@@ -14,6 +14,7 @@ import uz.online_course.project.uz_online_course_project.enums.GeneralRoles;
 
 public class UpdateUser {
 
+    private Long id;
     @NotEmpty(message = "User name  cannot be empty")
     private String username;
 

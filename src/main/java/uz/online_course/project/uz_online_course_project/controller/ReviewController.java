@@ -48,8 +48,8 @@ public class ReviewController {
         }
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<ApiResponse> updateReview(@PathVariable("id") Long reviewId, @RequestBody ReviewDto reviewDto) {
+    @PutMapping("/update/{reviewId}")
+    public ResponseEntity<ApiResponse> updateReview(@PathVariable Long reviewId, @RequestBody ReviewDto reviewDto) {
         try {
             ReviewDto updateReviewDto = reviewService.updateReviewDto(reviewId, reviewDto);
             return ResponseEntity.ok(new ApiResponse("Review updated successfully", updateReviewDto));
