@@ -1,4 +1,4 @@
-package uz.online_course.project.uz_online_course_project.security;
+package uz.online_course.project.uz_online_course_project.security.jwtConfig;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

@@ -1,4 +1,4 @@
-package uz.online_course.project.uz_online_course_project.security;
+package uz.online_course.project.uz_online_course_project.security.jwtConfig;
 
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -14,6 +14,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
+import uz.online_course.project.uz_online_course_project.security.CustomUserDetailsService;
+import uz.online_course.project.uz_online_course_project.security.SpringConfig;
 
 import java.io.IOException;
 import java.util.Arrays;

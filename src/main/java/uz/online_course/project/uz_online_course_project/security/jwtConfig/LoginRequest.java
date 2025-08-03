@@ -1,4 +1,4 @@
-package uz.online_course.project.uz_online_course_project.enums;
+package uz.online_course.project.uz_online_course_project.security.jwtConfig;
 
 
 import lombok.AllArgsConstructor;
