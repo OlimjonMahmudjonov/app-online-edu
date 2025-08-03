@@ -2,6 +2,7 @@ package uz.online_course.project.uz_online_course_project.service.category;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.online_course.project.uz_online_course_project.dto.CategoryCreateDto;
 import uz.online_course.project.uz_online_course_project.dto.CategoryDto;
 import uz.online_course.project.uz_online_course_project.entity.Category;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CategoryService implements ICategoryService {
     private final CategoryRepository categoryRepository;
 
@@ -26,7 +28,7 @@ public class CategoryService implements ICategoryService {
         category.setName(categoryCreateDto.getName());
         category.setDescription(categoryCreateDto.getDescription());
         Category saveCategory = categoryRepository.save(category);
-        return converTodto(saveCategory);
+        return converseTodo(saveCategory);
     }
 
     @Override
@@ -41,42 +43,44 @@ public class CategoryService implements ICategoryService {
         category.setDescription(categoryCreateDto.getDescription());
 
         Category updateCategory = categoryRepository.save(category);
-        return converTodto(updateCategory);
+        return converseTodo(updateCategory);
     }
 
     @Override
     public CategoryDto getCategoryById(Long id) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category not found" + id));
-        return converTodto(category);
+        return converseTodo(category);
 
     }
 
     @Override
     public List<CategoryDto> getCategories() {
-        return categoryRepository.findAll().stream().map(this::converTodto).collect(Collectors.toList());
+        return categoryRepository.findAll().stream().map(this::converseTodo).collect(Collectors.toList());
     }
 
     @Override
     public List<CategoryDto> getAllCategoriesAndCourses() {
         List<Category> categories = categoryRepository.findCategoriesWithCourses();
         return categories.stream()
-                .map(this::converTodto)
+                .map(this::converseTodo)
                 .collect(Collectors.toList());
     }
 
 
     @Override
-    public boolean deleteCategoryById(Long id) {
+    @Transactional
+    public void deleteCategoryById(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
 
+        // Kurslarni o‘chirib yuborish (orphanRemoval = true bo'lgani uchun yetarli)
+        category.getCourses().clear();
 
-        Category category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category not found" + id));
-
-        if (category.getCourses() != null && !category.getCourses().isEmpty()) {
-            throw new AlreadyExistsException("Category already exists" + category.getName());
-        }
         categoryRepository.delete(category);
-        return true;
     }
+
+
+
 
     @Override
     public boolean existsCategoryName(String name) {
@@ -86,7 +90,7 @@ public class CategoryService implements ICategoryService {
     @Override
     public List<CategoryDto> serchCategoryByName(String name) {
         List<Category> categories = categoryRepository.findByNameContainingIgnoreCase(name);
-        return categories.stream().map(this::converTodto).collect(Collectors.toList());
+        return categories.stream().map(this::converseTodo).collect(Collectors.toList());
     }
 
     @Override
@@ -94,7 +98,7 @@ public class CategoryService implements ICategoryService {
         return categoryRepository.count();
     }
 
-    private CategoryDto converTodto(Category category) {
+    private CategoryDto converseTodo(Category category) {
         CategoryDto categoryDto = new CategoryDto();
         categoryDto.setId(category.getId());
         categoryDto.setName(category.getName());

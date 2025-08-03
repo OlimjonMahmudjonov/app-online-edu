@@ -17,7 +17,13 @@ public class UserRoles {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "User cannot be null")
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    private GeneralRoles role;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -25,12 +31,4 @@ public class UserRoles {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id")
     private Course course;
-
-    @NotNull(message = "Role cannot be null")
-    @Column(name = "role")
-    @Enumerated(EnumType.STRING)
-    private GeneralRoles role;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
 }

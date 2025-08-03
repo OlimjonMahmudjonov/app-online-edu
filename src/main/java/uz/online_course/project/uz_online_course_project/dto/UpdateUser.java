@@ -1,6 +1,9 @@
 package uz.online_course.project.uz_online_course_project.dto;
 
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import uz.online_course.project.uz_online_course_project.enums.GeneralRoles;
 
@@ -10,12 +13,28 @@ import uz.online_course.project.uz_online_course_project.enums.GeneralRoles;
 @NoArgsConstructor
 
 public class UpdateUser {
+
+    @NotEmpty(message = "User name  cannot be empty")
     private String username;
+
+    @NotEmpty(message = "Email cannot be empty")
+    @Email
     private String email;
+
+    @NotEmpty(message = "Password cannot be empty")
+    @Size(min = 8 , message = "Password size cannot be 7 character ")
     private String password;
+
+    @NotEmpty(message = "General Role  cannot be empty")
     private GeneralRoles role;
+
+    @NotEmpty(message = "Visible cannot be empty")
     private Boolean visible;
-    private String telegramChatId;
+
+    @NotEmpty(message = "Telegram Chat Id  cannot be empty")
+    private Long telegramChatId;
+
+    @NotEmpty(message = "Telegram Chat Name  cannot be empty")
     private String telegramUserName;
 
 }

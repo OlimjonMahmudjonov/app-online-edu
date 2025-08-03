@@ -14,6 +14,6 @@ public interface CourseCommentRepository extends JpaRepository<CourseComment, Lo
 
     Long countByCourseId(Long courseId);
 
-    // Tuzatilgan method nomi
+
     Long countByBlogId(Long blogId);
 }

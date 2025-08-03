@@ -1,28 +1,28 @@
 package uz.online_course.project.uz_online_course_project.service.lesson;
 
+import uz.online_course.project.uz_online_course_project.dto.LessonCreateDto;
+import uz.online_course.project.uz_online_course_project.dto.LessonDto;
 import uz.online_course.project.uz_online_course_project.dto.LessonUpdateDto;
 import uz.online_course.project.uz_online_course_project.entity.Lesson;
-import uz.online_course.project.uz_online_course_project.request.AddLesson;
 
 import java.util.List;
 
 public interface ILessonService {
-
     void deleteLessonById(Long id);
 
-    Lesson addlesson(AddLesson lesson);
+    LessonDto addLesson(LessonCreateDto lessonCreateDto);
 
-    Lesson getLessonById(Long id);
+    LessonDto getLessonById(Long id);
 
-    Lesson updateLesson(LessonUpdateDto lessonUpdateDto, Long lessonId);
+    LessonDto updateLesson(LessonUpdateDto lessonUpdateDto, Long lessonId);
 
-    List<Lesson> getLessons();
+    List<LessonDto> getLessons();
 
-    Lesson getLessonByTitle(String title);
+    LessonDto getLessonByTitle(String title);
 
-    List<Lesson> getLessonsByCourseId(Long courseId);
+    List<LessonDto> getLessonsByCourseId(Long courseId);
 
-    List<Lesson> getLessonByCourseIdAndderByOrder(Long courseId, Integer lessonOrder);
+    List<LessonDto> getLessonsByCourseIdAndOrder(Long courseId, Integer lessonOrder);
 
     boolean existsByTitleAndCourseId(String title, Long courseId);
 

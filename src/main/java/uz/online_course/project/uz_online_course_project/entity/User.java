@@ -5,6 +5,7 @@
     import jakarta.validation.constraints.NotEmpty;
     import lombok.*;
     import uz.online_course.project.uz_online_course_project.enums.GeneralRoles;
+    import uz.online_course.project.uz_online_course_project.enums.GeneralsStatus;
 
     import java.time.LocalDateTime;
     import java.util.List;
@@ -20,22 +21,23 @@
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;
 
-        @NotEmpty(message = "Username cannot be empty")
         @Column(name = "username")
         private String username;
 
-        @Email(message = "Email should be valid")
-        @NotEmpty(message = "Email cannot be empty")
         @Column(name = "email")
         private String email;
 
-        @NotEmpty(message = "Password cannot be empty")
         @Column(name = "password")
         private String password;
 
         @Column(name = "role")
         @Enumerated(EnumType.STRING)
         private GeneralRoles role;
+
+         @Column(name = "status")
+        @Enumerated(EnumType.STRING)
+        private GeneralsStatus status;
+
 
         @Column(name = "visible")
         private Boolean visible = Boolean.TRUE;
@@ -44,7 +46,7 @@
         private LocalDateTime createdDate;
 
         @Column(name = "telegram_chat_id")
-        private String telegramChatId;
+        private Long telegramChatId;
 
         @Column(name = "telegram_user_name")
         private String telegramUserName;

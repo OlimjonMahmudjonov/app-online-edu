@@ -46,10 +46,12 @@ public class CourseCreateDto {
 
     @NotEmpty(message = "Duration cannot be empty")
     @Column(name = "duration", nullable = false)
-    private String duration;// muddati
-
+    private String duration;
     private  GeneralLevel generalLevel;
+
+    @NotNull(message = "Category  ID is required")
     private  Long categoryId;
 
+    @NotNull(message = "Instructor  ID is required")
     private Long instructorId;
 }

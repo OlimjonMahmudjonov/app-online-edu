@@ -1,7 +1,5 @@
 package uz.online_course.project.uz_online_course_project.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,16 +9,11 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class LessonUpdateDto {
-    @NotBlank(message = "Title cannot be empty")
+public class LessonDto {
+    private Long id;
     private String title;
-
-    @NotBlank(message = "Content cannot be empty")
     private String content;
-
-    @NotBlank(message = "Video URL cannot be empty")
     private String videoUrl;
-
-    @NotNull(message = "Lesson order cannot be empty")
     private Integer lessonOrder;
+    private Long courseId;
 }

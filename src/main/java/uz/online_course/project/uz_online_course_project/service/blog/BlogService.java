@@ -2,6 +2,7 @@ package uz.online_course.project.uz_online_course_project.service.blog;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.online_course.project.uz_online_course_project.dto.BlogDto;
 import uz.online_course.project.uz_online_course_project.dto.BlogDtoCreate;
 import uz.online_course.project.uz_online_course_project.entity.Blog;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class BlogService implements IBlogService {
     private final BlogRepository blogRepository;
     private final UserRepository userRepository;
@@ -26,7 +28,7 @@ public class BlogService implements IBlogService {
     @Override
     public BlogDto getBlogById(Long id) {
         return blogRepository.findById(id)
-                .map(blog -> convertToDto(blog))
+                .map(this::convertToDto)
                 .orElseThrow(() -> new ResourceNotFoundException("Blog not found"));
     }
 
@@ -43,7 +45,8 @@ public class BlogService implements IBlogService {
     @Override
     public BlogDto updateBlogById(Long id, BlogDtoCreate blog) {
 
-        return blogRepository.findById(id).map(existsBlog -> {
+        return blogRepository.findById(id)
+                .map(existsBlog -> {
             existsBlog.setTitle(blog.getTitle());
             existsBlog.setContent(blog.getContent());
             if (blog.getAuthorId() != null) {
@@ -51,6 +54,7 @@ public class BlogService implements IBlogService {
                         new ResourceNotFoundException("Author not found with " + blog.getAuthorId()));
                 existsBlog.setAuthor(user);
             }
+
             return convertToDto(blogRepository.save(existsBlog));
 
         }).orElseThrow(() -> new ResourceNotFoundException("Blog not found with id " + id));
@@ -76,7 +80,7 @@ public class BlogService implements IBlogService {
     public List<BlogDto> getAllBlogs() {
         return blogRepository.findAll()
                 .stream()
-                .map(blog -> convertToDto(blog))
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
@@ -84,9 +88,10 @@ public class BlogService implements IBlogService {
     public List<BlogDto> getBlogsByAuthorId(Long authorId) {
         userRepository.findById(authorId).orElseThrow(() ->
                 new ResourceNotFoundException("Author not found with " + authorId));
+
         return blogRepository.findAll().stream()
                 .filter(blog -> blog.getAuthor().getId().equals(authorId))
-                .map(blog -> convertToDto(blog))
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
 
     }
@@ -97,7 +102,7 @@ public class BlogService implements IBlogService {
                 .stream()
                 .sorted((timeOne, timeTwo) -> timeTwo.getCreatedAt().compareTo(timeOne.getCreatedAt()))
                 .limit(limit)
-                .map(blog -> convertToDto(blog))
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
 
     }

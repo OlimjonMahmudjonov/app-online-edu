@@ -20,6 +20,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @RestController
 @RequestMapping("/api/course")
 @RequiredArgsConstructor
+
 public class CourseController {
     private final ICourseService courseService;
 
@@ -114,8 +115,12 @@ public class CourseController {
 
     @GetMapping("/{courseId}/rating")
     public  ResponseEntity<ApiResponse> getAverageRatingByCourseId (@PathVariable Long courseId) {
-         double  averageRating = courseService.getAverageRatingByCourseId(courseId);
-         return ResponseEntity.ok(new ApiResponse("Course found successfully", averageRating));
+        try {
+            double  averageRating = courseService.getAverageRatingByCourseId(courseId);
+            return ResponseEntity.ok(new ApiResponse("Course found successfully", averageRating));
+        } catch (ResourceNotFoundException e) {
+           return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        }
     }
 
     @GetMapping("/count")

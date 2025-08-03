@@ -32,7 +32,7 @@ public class VideoCreate {
     @NotNull(message = "size is not negative ")
     private Long size;
 
-
+    @NotNull(message = "Lesson Id cannot be empty ")
     private Long lessonId;
 
 }

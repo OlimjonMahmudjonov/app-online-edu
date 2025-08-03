@@ -2,11 +2,13 @@ package uz.online_course.project.uz_online_course_project.service.video;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.online_course.project.uz_online_course_project.dto.VideoCreate;
 import uz.online_course.project.uz_online_course_project.dto.VideoDto;
 import uz.online_course.project.uz_online_course_project.dto.VideoUpdate;
 import uz.online_course.project.uz_online_course_project.entity.Lesson;
 import uz.online_course.project.uz_online_course_project.entity.Video;
+import uz.online_course.project.uz_online_course_project.excaption.AlreadyExistsException;
 import uz.online_course.project.uz_online_course_project.excaption.ResourceNotFoundException;
 import uz.online_course.project.uz_online_course_project.repository.LessonRepository;
 import uz.online_course.project.uz_online_course_project.repository.VideoRepository;
@@ -18,13 +20,22 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
+
 public class VideoService implements IVideoService {
+
     private final LessonRepository lessonRepository;
     private final VideoRepository videoRepository;
 
     @Override
     public VideoDto createVideo(VideoCreate videoCreate) {
-        Lesson lesson = lessonRepository.findById(videoCreate.getLessonId()).orElseThrow(() -> new ResourceNotFoundException("Lesson Not Found"));
+
+        Lesson lesson = lessonRepository.findById(videoCreate.getLessonId())
+                .orElseThrow(() -> new ResourceNotFoundException("Lesson Not Found"));
+
+        if ( videoRepository.existsByTitleAndLessonId (videoCreate.getTitle() , videoCreate.getLessonId())){
+            throw  new AlreadyExistsException("Video Title or Lesson Id  Already Exists");
+        }
         Video video = new Video();
         video.setTitle(videoCreate.getTitle());
         video.setDownloadUrl(videoCreate.getDownloadUrl());
@@ -60,7 +71,6 @@ public class VideoService implements IVideoService {
         video.setTitle(videoUpdate.getTitle());
         video.setDownloadUrl(videoUpdate.getDownloadUrl());
         video.setOriginalFilename(videoUpdate.getOriginalFilename());
-        // video.setUploadDate(LocalDateTime.now());
         video.setSize(videoUpdate.getSize());
         Video updateVideo = videoRepository.save(video);
         return converToVideoDto(updateVideo);

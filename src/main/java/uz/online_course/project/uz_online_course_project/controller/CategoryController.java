@@ -1,18 +1,21 @@
 package uz.online_course.project.uz_online_course_project.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uz.online_course.project.uz_online_course_project.dto.CategoryCreateDto;
 import uz.online_course.project.uz_online_course_project.dto.CategoryDto;
+import uz.online_course.project.uz_online_course_project.excaption.ResourceNotFoundException;
 import uz.online_course.project.uz_online_course_project.response.ApiResponse;
 import uz.online_course.project.uz_online_course_project.service.category.ICategoryService;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/${api.prefix}/category")
+@RequestMapping("/api/category")
 @RequiredArgsConstructor
+
 public class CategoryController {
 
     private final ICategoryService categoryService;
@@ -20,7 +23,7 @@ public class CategoryController {
     @PostMapping
     public ResponseEntity<ApiResponse> createCreateCategoryDto(@RequestBody CategoryCreateDto categoryCreateDto) {
         CategoryDto categoryDto = categoryService.createCreateCategoryDto(categoryCreateDto);
-        return ResponseEntity.ok(new ApiResponse("Category created successfully", categoryDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse(HttpStatus.CREATED.toString(), categoryDto));
     }
 
     @PutMapping("/update/{id}")
@@ -51,8 +54,11 @@ public class CategoryController {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<ApiResponse> deleteCategoryById(@PathVariable Long id) {
-        boolean deleteCategoryById = categoryService.deleteCategoryById(id);
-        return ResponseEntity.ok(new ApiResponse("Category deleted successfully", null));
+        try {
+           categoryService.deleteCategoryById(id);
+            return ResponseEntity.ok(new ApiResponse("Category deleted successfully", null));
+        } catch (ResourceNotFoundException e) {
+return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));        }
 
     }
 

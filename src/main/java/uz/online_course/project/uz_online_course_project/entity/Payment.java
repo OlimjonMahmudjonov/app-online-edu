@@ -21,26 +21,12 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "User cannot be null")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @NotNull(message = "Course cannot be null")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id")
-    private Course course;
-
-    @NotNull(message = "Amount cannot be null")
-    @Positive(message = "Amount must be positive")
     @Column(name = "amount")
     private BigDecimal amount;
 
-    @PastOrPresent(message = "Payment date must be in the past or present")
     @Column(name = "payment_date")
     private LocalDateTime paymentDate;
 
-    @NotNull(message = "Pay progress cannot be null")
     @Column(name = "pay_progress")
     @Enumerated(EnumType.STRING)
     private PayProgress payProgress;
@@ -50,4 +36,12 @@ public class Payment {
 
     @Column(name = "telegram_payment_token")
     private String telegramPaymentToken;
+
+    @ManyToOne(fetch = FetchType.LAZY , cascade = CascadeType.ALL )
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY )
+    @JoinColumn(name = "course_id")
+    private Course course;
 }

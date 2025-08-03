@@ -21,15 +21,15 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotEmpty(message = "Title cannot be empty")
+
     @Column(name = "title")
     private String title;
 
-    @NotEmpty(message = "Description cannot be empty")
+
     @Column(name = "description")
     private String description;
 
-    @PositiveOrZero(message = "Original price must be positive or zero")
+
     @Column(name = "original_price")
     private Double originalPrice;
 
@@ -54,7 +54,7 @@ public class Course {
 
     @NotNull(message = "Category cannot be null")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
     @NotNull(message = "Instructor cannot be null")
@@ -71,7 +71,7 @@ public class Course {
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
     private List<Review> reviews;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Payment> payments;
 
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)

@@ -17,7 +17,7 @@ public interface ICategoryService {
 
     List<CategoryDto> getAllCategoriesAndCourses();
 
-    boolean deleteCategoryById(Long id);
+    void deleteCategoryById(Long id);
 
     boolean existsCategoryName(String name);
 

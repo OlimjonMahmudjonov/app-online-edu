@@ -1,15 +1,20 @@
 package uz.online_course.project.uz_online_course_project.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uz.online_course.project.uz_online_course_project.dto.VideoCreate;
 import uz.online_course.project.uz_online_course_project.dto.VideoDto;
 import uz.online_course.project.uz_online_course_project.dto.VideoUpdate;
+import uz.online_course.project.uz_online_course_project.excaption.AlreadyExistsException;
+import uz.online_course.project.uz_online_course_project.excaption.ResourceNotFoundException;
 import uz.online_course.project.uz_online_course_project.response.ApiResponse;
 import uz.online_course.project.uz_online_course_project.service.video.IVideoService;
 
 import java.util.List;
+
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
 @RequestMapping("/api/video")
@@ -20,15 +25,25 @@ public class VideoController {
 
     @PostMapping
     public ResponseEntity<ApiResponse> createVideo(@RequestBody VideoCreate videoCreate) {
-        VideoDto videoDto = videoService.createVideo(videoCreate);
-        return ResponseEntity.ok(new ApiResponse("Video created successfully", videoDto));
+        try {
+            VideoDto videoDto = videoService.createVideo(videoCreate);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse("Video created successfully", videoDto));
+        }  catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        }catch (AlreadyExistsException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse(e.getMessage(), null));
+        }
     }
 
 
     @GetMapping("/get/{id}")
     public ResponseEntity<ApiResponse> findVideoById(@PathVariable Long id) {
-        VideoDto videoDto = videoService.findVideoById(id);
-        return ResponseEntity.ok(new ApiResponse("Video found successfully", videoDto));
+        try {
+            VideoDto videoDto = videoService.findVideoById(id);
+            return ResponseEntity.ok(new ApiResponse("Video found successfully", videoDto));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Video not found", null));
+        }
     }
 
     @GetMapping("/get/all")
@@ -40,14 +55,26 @@ public class VideoController {
 
     @DeleteMapping("delete/{id}")
     public ResponseEntity<ApiResponse> deleteVideoById(@PathVariable Long id) {
-        videoService.deleteVideoById(id);
-        return ResponseEntity.ok(new ApiResponse("Video deleted successfully", true));
+        try {
+            videoService.deleteVideoById(id);
+            return ResponseEntity.ok(new ApiResponse("Video deleted successfully", null));
+        } catch (ResourceNotFoundException e) {
+           return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Video not found", null));
+        }
     }
 
     @PutMapping("update/{id}")
     public ResponseEntity<ApiResponse> updateVideoResponse(@PathVariable Long id, @RequestBody VideoUpdate videoUpdate) {
-        VideoDto videoDto = videoService.updateVideo(id, videoUpdate);
-        return ResponseEntity.ok(new ApiResponse("Video updated successfully", videoDto));
+        try {
+            VideoDto videoDto = videoService.updateVideo(id, videoUpdate);
+            return ResponseEntity.ok(new ApiResponse("Video updated successfully", videoDto));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse("Concurrent update conflict: " + e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse("Internal server error", null));
+        }
     }
 
     @GetMapping("/search/title")
@@ -62,7 +89,7 @@ public class VideoController {
         return ResponseEntity.ok(new ApiResponse("Videos found successfully", count));
     }
 
-    @GetMapping("/lesson/{id}")
+    @GetMapping("/lesson/{lessonId}")
     public ResponseEntity<ApiResponse> findAllVideosByLessonId(@PathVariable Long lessonId) {
         List<VideoDto> videoDtos = videoService.findAllVideosByLessonId(lessonId);
         return ResponseEntity.ok(new ApiResponse("Videos found successfully", videoDtos));

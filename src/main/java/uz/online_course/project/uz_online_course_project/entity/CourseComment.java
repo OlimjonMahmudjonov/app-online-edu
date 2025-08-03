@@ -25,12 +25,12 @@ public class CourseComment {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @NotNull(message = "User cannot be null")
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @NotNull(message = "Course cannot be null")
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id")
     private Course course;

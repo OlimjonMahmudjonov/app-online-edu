@@ -20,26 +20,20 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "User cannot be null")
+    @Column(name = "rating")
+    private Integer rating;
+
+    @Column(name = "comment")
+    private String comment;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @NotNull(message = "Course cannot be null")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id")
     private Course course;
-
-    @Min(value = 1, message = "Rating must be at least 1")
-    @Max(value = 5, message = "Rating cannot exceed 5")
-    @Column(name = "rating")
-    private Integer rating;
-
-    @NotEmpty(message = "Comment cannot be empty")
-    @Column(name = "comment")
-    private String comment;
-
-    @NotNull(message = "Created at cannot be null")
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
 }

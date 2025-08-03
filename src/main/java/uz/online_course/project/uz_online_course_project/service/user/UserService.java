@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class UserService implements IUserService {
-
+public class UserService  {
+/*
     private final UserRepository userRepository;
   //  private final PasswordEncoder passwordEncoder;
 
@@ -69,5 +69,5 @@ public class UserService implements IUserService {
         userRepository.findById(userId).ifPresentOrElse(userRepository::delete,
                 () -> new ResourceNotFoundException("User not found with id " + userId));
 
-    }
+    }*/
 }

@@ -18,17 +18,17 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Name cannot be empty")
+
     @Size(max = 255, message = "Name cannot exceed 255 characters")
     @Column(name = "name")
     private String name;
 
-    @NotNull(message = "Description cannot be empty")
+
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     @Column(name = "description")
     private String description;
 
-    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Course> courses;
 
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)

@@ -6,9 +6,6 @@ import uz.online_course.project.uz_online_course_project.entity.Lesson;
 import java.util.List;
 
 public interface LessonRepository extends JpaRepository<Lesson, Long> {
-
-    boolean existsByTitleAndContent(String title, String content);
-
     boolean existsByTitleAndCourseId(String title, Long courseId);
 
     boolean existsByLessonOrderAndCourseId(Integer lessonOrder, Long courseId);

@@ -24,10 +24,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class ReviewService implements IReviewService {
+
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
-  //  private final ModelMapper mapper;
 
     @Override
     public ReviewDto getReviewDtoById(Long id) {
@@ -76,6 +76,7 @@ public class ReviewService implements IReviewService {
 
     @Override
     public ReviewDto createReviewDto(ReviewDto review) {
+
         ReviewCreateDto createDto = new ReviewCreateDto();
         createDto.setUserId(review.getUserId());
         createDto.setCourseId(review.getCourseId());
@@ -144,30 +145,30 @@ public class ReviewService implements IReviewService {
                 .stream()
                 .sorted((time_1, time_2) -> time_2.getCreatedAt().compareTo(time_1.getCreatedAt()))
                 .limit(limit)
-                .map(review -> convertToDto(review))
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public Double getAverageRating(Long courseId) {
-        courseRepository.findById(courseId).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        @Override
+        public Double getAverageRating(Long courseId) {
+            courseRepository.findById(courseId).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
-        List<Review> courseReviews = reviewRepository.findAll()
-                .stream()
-                .filter(review -> review.getCourse().getId().equals(courseId))
-                .toList();
+            List<Review> courseReviews = reviewRepository.findAll()
+                    .stream()
+                    .filter(review -> review.getCourse().getId().equals(courseId))
+                    .toList();
 
-        if (courseReviews.isEmpty()) {
-            return 0.0;
+            if (courseReviews.isEmpty()) {
+                return 0.0;
+            }
+
+            double average = courseReviews
+                    .stream()
+                    .mapToInt(Review::getRating)
+                    .average()
+                    .orElse(0.0);
+            return Math.round(average * 100.0) / 100.0;
         }
-
-        double average = courseReviews
-                .stream()
-                .mapToInt(Review::getRating)
-                .average()
-                .orElse(0.0);
-        return Math.round(average * 100.0) / 100.0;
-    }
 
     @Override
     public boolean existsReviewDtoById(Long id) {

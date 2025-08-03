@@ -1,6 +1,5 @@
 package uz.online_course.project.uz_online_course_project.service.payment;
 
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +14,6 @@ import uz.online_course.project.uz_online_course_project.repository.CourseReposi
 import uz.online_course.project.uz_online_course_project.repository.PaymentRepository;
 import uz.online_course.project.uz_online_course_project.repository.UserRepository;
 
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -23,19 +21,20 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PaymentService implements IPaymentSerivce {
 
     private final UserRepository userRepository;
-    private CourseRepository courseRepository;
-    private PaymentRepository paymentRepository;
+    private final CourseRepository courseRepository;
+    private final PaymentRepository paymentRepository;
 
     @Override
     public PaymentDto createPayment(PaymentCreateDto paymentCreateDto) {
         User user = userRepository.findById(paymentCreateDto.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found" + paymentCreateDto.getUserId()));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + paymentCreateDto.getUserId()));
 
         Course course = courseRepository.findById(paymentCreateDto.getCourseId())
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found" + paymentCreateDto.getCourseId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with ID: " + paymentCreateDto.getCourseId()));
 
         Payment payment = new Payment();
         payment.setUser(user);
@@ -49,69 +48,109 @@ public class PaymentService implements IPaymentSerivce {
         return convertToDto(savedPayment);
     }
 
-
     @Override
     public PaymentDto updatePayment(Long payId, PayProgress payProgress) {
         Payment payment = paymentRepository.findById(payId)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found" + payId));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with ID: " + payId));
 
         payment.setPayProgress(payProgress);
+
+        if (payProgress == PayProgress.COMPLETED || payProgress == PayProgress.SUCCESS) {
+            payment.setPaymentDate(LocalDateTime.now());
+        }
+
         Payment updatedPayment = paymentRepository.save(payment);
         return convertToDto(updatedPayment);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public PaymentDto getPaymentById(Long paymentId) {
         Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found" + paymentId));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with ID: " + paymentId));
 
         return convertToDto(payment);
     }
 
     @Override
     public List<PaymentDto> getPaymentsByUserId(Long userId) {
+
+        if (!userRepository.existsById(userId)) {
+            throw new ResourceNotFoundException("User not found with ID: " + userId);
+        }
+
         List<Payment> payments = paymentRepository.findByUserId(userId);
-        return payments.stream().map(this::convertToDto).collect(Collectors.toList());
+        return payments.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<PaymentDto> getPamentsByCourseId(Long courseId) {
+    public List<PaymentDto> getPaymentsByCourseId(Long courseId) {
+       /* if (!courseRepository.existsById(courseId)) {
+            throw new ResourceNotFoundException("Course not found with ID: " + courseId);
+        }*/
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with ID: " + courseId));
+
         List<Payment> payments = paymentRepository.findByCourseId(courseId);
-        return payments.stream().map(this::convertToDto).collect(Collectors.toList());
+        return payments.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<PaymentDto> getPamentsByAll() {
+    public List<PaymentDto> getPaymentsByAll() {
         List<Payment> payments = paymentRepository.findAll();
-        return payments.stream().map(pay -> convertToDto(pay)).collect(Collectors.toList());
+        return payments.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public boolean deletePaymentById(Long paymentId) {
-        if (paymentRepository.findById(paymentId).isPresent()) {
-            paymentRepository.deleteById(paymentId);
-            return true;
+        Optional<Payment> paymentOptional = paymentRepository.findById(paymentId);
+        if (paymentOptional.isPresent()) {
+            Payment payment = paymentOptional.get();
+
+            if (payment.getPayProgress() == PayProgress.PENDING ||
+                    payment.getPayProgress() == PayProgress.FAILED ||
+                    payment.getPayProgress() == PayProgress.CANCELLED) {
+
+                paymentRepository.deleteById(paymentId);
+                return true;
+            } else {
+                throw new IllegalStateException("Cannot delete payment with status: " + payment.getPayProgress());
+            }
         }
         return false;
     }
 
     @Override
+
     public PaymentDto processPayment(Long paymentId, String transactionId) {
         Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found" + paymentId));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with ID: " + paymentId));
+
+        if (payment.getPayProgress() != PayProgress.PENDING) {
+            throw new IllegalStateException("Cannot process payment with status: " + payment.getPayProgress());
+        }
 
         payment.setTransactionId(transactionId);
         payment.setPayProgress(PayProgress.PROGRESSING);
-        payment.setPaymentDate(LocalDateTime.now());
+
         Payment savedPayment = paymentRepository.save(payment);
         return convertToDto(savedPayment);
     }
 
     @Override
     public boolean verifyPayment(String transactionId) {
-        Optional<Payment> payment = paymentRepository.findByTransactionId(transactionId);
-        return payment.isPresent() && payment.get().getPayProgress() == PayProgress.COMPLETED;
+        if (transactionId == null || transactionId.trim().isEmpty()) {
+            return false;
+        }
+
+        Optional<Payment> paymentOptional = paymentRepository.findByTransactionId(transactionId);
+        return paymentOptional.isPresent() &&
+                paymentOptional.get().getPayProgress() == PayProgress.COMPLETED;
     }
 
     private PaymentDto convertToDto(Payment payment) {
@@ -128,6 +167,5 @@ public class PaymentService implements IPaymentSerivce {
         paymentDto.setTelegramPaymentToken(payment.getTelegramPaymentToken());
 
         return paymentDto;
-
     }
 }

@@ -22,33 +22,30 @@ public class CourseUpdateDto {
 
 
     @NotEmpty(message = "Title cannot be empty")
-    @Column(name = "title", nullable = false)
     private String title;
 
     @NotEmpty(message = "Description cannot be empty")
-    @Column(name = "description", nullable = false)
     private String description;
 
     @PositiveOrZero(message = "Original price must be positive or zero")
-    @Column(name = "originalPrice")
     private Double originalPrice;
 
     @PositiveOrZero(message = "Discount price must be positive or zero")
-    @Column(name = "discountPrice")
     private Double discountPrice;
 
-    @Column(name = "discountEndDate")
+
     private LocalDateTime discountEndDate;
 
     @NotNull(message = "IsFree cannot be null")
-    @Column(name = "isFree", nullable = false)
     private Boolean isFree;
 
     @NotEmpty(message = "Duration cannot be empty")
-    @Column(name = "duration", nullable = false)
     private String duration;// muddati
 
+    @NotEmpty(message = "General Level  cannot be empty")
     private GeneralLevel generalLevel;
+
+    @NotNull(message = "Category ID is required")
     private Long categoryId;
 
 

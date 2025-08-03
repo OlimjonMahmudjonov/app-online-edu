@@ -2,6 +2,7 @@ package uz.online_course.project.uz_online_course_project.service.questionanswer
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.online_course.project.uz_online_course_project.dto.QuestionAnswerCreate;
 import uz.online_course.project.uz_online_course_project.dto.QuestionAnswerDto;
 import uz.online_course.project.uz_online_course_project.entity.Category;
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
+@Transactional
+
 public class QuestionAnswerService implements IQuestionAnswerService {
     private final UserRepository userRepository;
     private final QuestionAnswerRepository questionAnswerRepository;
@@ -39,6 +42,7 @@ public class QuestionAnswerService implements IQuestionAnswerService {
 
     @Override
     public QuestionAnswerDto updateQuestionAnswer(Long id, QuestionAnswerCreate questionAnswerCreate) {
+
         QuestionAnswer existingQuestionAnswer = questionAnswerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("QuestionAnswer not found with id: " + id));
 
@@ -63,12 +67,13 @@ public class QuestionAnswerService implements IQuestionAnswerService {
 
     @Override
     public QuestionAnswerDto createQuestionAnswer(QuestionAnswerCreate questionAnswerCreate) {
+
         User user = userRepository.findById(questionAnswerCreate.getAuthId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + questionAnswerCreate.getAuthId()));
 
         Category category = null;
         if (questionAnswerCreate.getCategoryId() != null) {
-            category = categoryRepository.findById(questionAnswerCreate.getCategoryId())
+             category = categoryRepository.findById(questionAnswerCreate.getCategoryId())
                     .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + questionAnswerCreate.getCategoryId()));
         }
 
@@ -160,9 +165,8 @@ public class QuestionAnswerService implements IQuestionAnswerService {
             dto.setCategoryName(questionAnswer.getCategory().getName());
         }
 
-        // hasAnswer maydoniga boolean qiymat o'rnatish
         dto.setHasAnswer(questionAnswer.getAnswer() != null && !questionAnswer.getAnswer().trim().isEmpty());
-        dto.setLikesCount(0); // Default qiymat
+        dto.setLikesCount(0);
 
         return dto;
     }

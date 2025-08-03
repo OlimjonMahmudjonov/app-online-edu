@@ -15,9 +15,9 @@ public interface IPaymentSerivce {
 
     List<PaymentDto> getPaymentsByUserId(Long userId);
 
-    List<PaymentDto> getPamentsByCourseId(Long courseId);
+    List<PaymentDto> getPaymentsByCourseId(Long courseId);
 
-    List<PaymentDto> getPamentsByAll();
+    List<PaymentDto> getPaymentsByAll();
 
     boolean deletePaymentById(Long paymentId);
 

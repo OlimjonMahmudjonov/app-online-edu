@@ -6,6 +6,7 @@ import uz.online_course.project.uz_online_course_project.dto.CourseCommentDto;
 import java.util.List;
 
 public interface ICourseComment {
+
     CourseCommentDto getCourseCommentById(Long id);
 
     void deleteCourseCommentById(Long id);

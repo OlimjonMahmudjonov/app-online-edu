@@ -1,8 +1,8 @@
 package uz.online_course.project.uz_online_course_project.service.courseComment;
 
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.online_course.project.uz_online_course_project.dto.CourseCommentCreateDto;
 import uz.online_course.project.uz_online_course_project.dto.CourseCommentDto;
 import uz.online_course.project.uz_online_course_project.entity.Blog;
@@ -17,143 +17,140 @@ import uz.online_course.project.uz_online_course_project.repository.UserReposito
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
+
 public class CourseCommentService implements ICourseComment {
+
     private final CourseCommentRepository commentRepository;
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
     private final BlogRepository blogRepository;
-    private final ModelMapper modelMapper;
 
     @Override
     public CourseCommentDto getCourseCommentById(Long id) {
         return commentRepository.findById(id)
-                .map(res -> convertToDto(res))
-                .orElseThrow(() -> new ResourceNotFoundException("course comment not found"));
+                .map(this::convertToDto)
+                .orElseThrow(() -> new ResourceNotFoundException("Course comment not found with id: " + id));
     }
 
     @Override
     public void deleteCourseCommentById(Long id) {
-        commentRepository.findById(id)
-                .ifPresentOrElse(commentRepository::delete,
-                        () -> {
-                            throw new ResourceNotFoundException("course comment not found");
-                        });
+        if (!commentRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Course comment not found with id: " + id);
+        }
+        commentRepository.deleteById(id);
     }
 
     @Override
     public CourseCommentDto updateCourseComment(Long id, CourseCommentDto commentDto) {
-        return commentRepository.findById(id)
-                .map(existsComment -> {
 
-                    if (commentDto.getComment() != null && !commentDto.getComment().trim().isEmpty()) {
-                        existsComment.setContent(commentDto.getComment());
-                    }
+        CourseComment existingComment = commentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course comment not found with id: " + id));
 
-                    if (commentDto.getUserId() != null) {
-                        User user = userRepository.findById(commentDto.getUserId())
-                                .orElseThrow(() -> new ResourceNotFoundException("user not found" + commentDto.getUserId()));
-                        existsComment.setUser(user);
-                    }
+        if (commentDto.getComment() != null && !commentDto.getComment().trim().isEmpty()) {
+            existingComment.setContent(commentDto.getComment());
+        }
 
-                    if (commentDto.getCourseId() != null) {
-                        Course course = courseRepository.findById(commentDto.getCourseId())
-                                .orElseThrow(() -> new ResourceNotFoundException("course not found" + commentDto.getCourseId()));
-                        existsComment.setCourse(course);
-                    }
+        if (commentDto.getUserId() != null) {
+            User user = userRepository.findById(commentDto.getUserId())
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + commentDto.getUserId()));
+            existingComment.setUser(user);
+        }
 
-                    if (commentDto.getBlogId() != null) {
-                        Blog blog = blogRepository.findById(commentDto.getBlogId())
-                                .orElseThrow(() -> new ResourceNotFoundException("blog not found" + commentDto.getBlogId()));
-                        existsComment.setBlog(blog);
-                    }
-                    return convertToDto(commentRepository.save(existsComment));
-                }).orElseThrow(() -> new ResourceNotFoundException("course comment not found"));
+        if (commentDto.getCourseId() != null) {
+            Course course = courseRepository.findById(commentDto.getCourseId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + commentDto.getCourseId()));
+            existingComment.setCourse(course);
+        }
+
+        if (commentDto.getBlogId() != null) {
+            Blog blog = blogRepository.findById(commentDto.getBlogId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Blog not found with id: " + commentDto.getBlogId()));
+            existingComment.setBlog(blog);
+        }
+
+        CourseComment savedComment = commentRepository.save(existingComment);
+        return convertToDto(savedComment);
     }
 
     @Override
     public CourseCommentDto createCourseComment(CourseCommentCreateDto commentDto) {
-        CourseCommentCreateDto dto = new CourseCommentCreateDto();
-        dto.setCourseId(commentDto.getCourseId());
-        dto.setUserId(commentDto.getUserId());
-        dto.setBlogId(commentDto.getBlogId());
-      //  dto.setContent(commentDto.getComment());
-
-        return createComment(dto);
-    }
-
-    private CourseCommentDto createComment(CourseCommentCreateDto dto) {
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("user not found"));
-
-        if (dto.getCourseId() == null || dto.getBlogId() == null) {
+        if (commentDto.getCourseId() == null && commentDto.getBlogId() == null) {
             throw new IllegalArgumentException("Either courseId or blogId must be provided");
         }
+
+
+        User user = userRepository.findById(commentDto.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + commentDto.getUserId()));
 
         Course course = null;
         Blog blog = null;
 
-        if (dto.getCourseId() != null) {
-            course = courseRepository.findById(dto.getCourseId())
-                    .orElseThrow(() -> new ResourceNotFoundException("course not found"));
+        if (commentDto.getCourseId() != null) {
+            course = courseRepository.findById(commentDto.getCourseId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + commentDto.getCourseId()));
         }
 
-        if (dto.getBlogId() != null) {
-            blog = blogRepository.findById(dto.getBlogId())
-                    .orElseThrow(() -> new ResourceNotFoundException("blog not found"));
+        if (commentDto.getBlogId() != null) {
+            blog = blogRepository.findById(commentDto.getBlogId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Blog not found with id: " + commentDto.getBlogId()));
         }
 
-        final Course finalCourse = course;
-        final Blog finalBlog = blog;
-        final User finalUser = user;
+        CourseComment comment = new CourseComment();
+        comment.setContent(commentDto.getContent());
+        comment.setUser(user);
+        comment.setCourse(course);
+        comment.setBlog(blog);
+        comment.setCreatedAt(LocalDateTime.now());
 
-        return Optional.of(dto)
-                .map(commentDto -> {
-                    CourseComment comment = new CourseComment();
-
-                    comment.setContent(commentDto.getContent());
-                    comment.setCreatedAt(LocalDateTime.now());
-                    comment.setCourse(finalCourse);
-                    comment.setUser(finalUser);
-                    comment.setBlog(finalBlog);
-                    return convertToDto(commentRepository.save(comment));
-
-                }).orElseThrow(() -> new RuntimeException("Failed to create CourseComment"));
+        CourseComment savedComment = commentRepository.save(comment);
+        return convertToDto(savedComment);
     }
 
     @Override
     public List<CourseCommentDto> getAllCourseComments() {
         return commentRepository.findAll().stream()
-                .map(comment -> convertToDto(comment))
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<CourseCommentDto> getCommentsByCourseId(Long courseId) {
-        courseRepository.findById(courseId).orElseThrow(() -> new ResourceNotFoundException("course not found"));
+        if (!courseRepository.existsById(courseId)) {
+            throw new ResourceNotFoundException("Course not found with id: " + courseId);
+        }
+
         return commentRepository.findByCourseIdOrderByCreatedAtDesc(courseId)
-                .stream().map(comment -> convertToDto(comment))
+                .stream()
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<CourseCommentDto> getCommentsByBlogId(Long blogId) {
-        blogRepository.findById(blogId).orElseThrow(() -> new ResourceNotFoundException("blog not found"));
+        if (!blogRepository.existsById(blogId)) {
+            throw new ResourceNotFoundException("Blog not found with id: " + blogId);
+        }
+
         return commentRepository.findByBlogIdOrderByCreatedAtDesc(blogId)
-                .stream().map(this::convertToDto)
+                .stream()
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<CourseCommentDto> getCommentsByUserId(Long userId) {
-        userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("user not found"));
+        if (!userRepository.existsById(userId)) {
+            throw new ResourceNotFoundException("User not found with id: " + userId);
+        }
 
         return commentRepository.findByUserIdOrderByCreatedAtDesc(userId)
-                .stream().map(this::convertToDto)
+                .stream()
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
@@ -161,8 +158,8 @@ public class CourseCommentService implements ICourseComment {
     public List<CourseCommentDto> getRecentComments(Integer limit) {
         return commentRepository.findAll()
                 .stream()
-                .sorted((time_1, time_2) -> time_2.getCreatedAt().compareTo(time_1.getCreatedAt()))
-                .limit(limit)
+                .sorted((c1, c2) -> c2.getCreatedAt().compareTo(c1.getCreatedAt()))
+                .limit(limit != null && limit > 0 ? limit : 10)
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
@@ -174,14 +171,17 @@ public class CourseCommentService implements ICourseComment {
 
     @Override
     public Long getCommentsCountByCourseId(Long courseId) {
-        courseRepository.findById(courseId).orElseThrow(() -> new ResourceNotFoundException("course not found"));
+        if (!courseRepository.existsById(courseId)) {
+            throw new ResourceNotFoundException("Course not found with id: " + courseId);
+        }
         return commentRepository.countByCourseId(courseId);
     }
 
     @Override
     public Long getCommentsCountByBlogId(Long blogId) {
-        blogRepository.findById(blogId).orElseThrow(() -> new ResourceNotFoundException("blog not found"));
-        // Tuzatilgan method nomi
+        if (!blogRepository.existsById(blogId)) {
+            throw new ResourceNotFoundException("Blog not found with id: " + blogId);
+        }
         return commentRepository.countByBlogId(blogId);
     }
 
@@ -192,7 +192,11 @@ public class CourseCommentService implements ICourseComment {
         dto.setComment(comment.getContent());
         dto.setCreatedAt(comment.getCreatedAt());
 
-        // Entity fieldlarini tekshirish (DTO emas)
+        if (comment.getUser() != null) {
+            dto.setUserId(comment.getUser().getId());
+            dto.setUsername(comment.getUser().getUsername());
+        }
+
         if (comment.getCourse() != null) {
             dto.setCourseId(comment.getCourse().getId());
             dto.setCourseTitle(comment.getCourse().getTitle());
@@ -201,11 +205,6 @@ public class CourseCommentService implements ICourseComment {
         if (comment.getBlog() != null) {
             dto.setBlogId(comment.getBlog().getId());
             dto.setBlogTitle(comment.getBlog().getTitle());
-        }
-
-        if (comment.getUser() != null) {
-            dto.setUserId(comment.getUser().getId());
-            dto.setUsername(comment.getUser().getUsername());
         }
 
         return dto;

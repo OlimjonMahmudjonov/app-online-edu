@@ -18,7 +18,6 @@ public class QuestionAnswer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotEmpty(message = "Question cannot be empty")
     @Column(name = "question")
     private String question;
 
@@ -28,7 +27,6 @@ public class QuestionAnswer {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @NotNull(message = "Author user cannot be null")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "auth_user_id")
     private User authUser;

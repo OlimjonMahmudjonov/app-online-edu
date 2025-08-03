@@ -1,21 +1,22 @@
 package uz.online_course.project.uz_online_course_project;
 
 
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
-import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+import uz.online_course.project.uz_online_course_project.telegram.OnlineEdu;
+
 
 import java.util.List;
 
@@ -23,9 +24,21 @@ import java.util.List;
 @SpringBootApplication
 public class Application {
 
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+    public static void main(String[] args) throws TelegramApiException {
+        //SpringApplication.run(Application.class, args);
+
+        ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
+        OnlineEdu onlineEdu = context.getBean(OnlineEdu.class);
+
+
+        try {
+            TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
+            telegramBotsApi.registerBot(onlineEdu);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
     }
+
     @Configuration
     public class SwaggerConfig {
 
@@ -51,22 +64,7 @@ public class Application {
                             new Server()
                                     .url("http://localhost:8080")
                                     .description("Production")
-                    ));/*.addSecurityItem(new SecurityRequirement().addList("basicAuth"))
-                    .components((new Components()
-                            .addSecuritySchemes("basicAuth", new SecurityScheme()
-                                    .name("basicAuth")
-                                    .type(SecurityScheme.Type.HTTP)
-                                    .scheme("basic")))
-
-                    )
-                    .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
-                    .components((new Components()
-                            .addSecuritySchemes("bearerAuth", new SecurityScheme()
-                                    .name("bearerAuth")
-                                    .type(SecurityScheme.Type.HTTP)
-                                    .scheme("bearer")
-                                    .bearerFormat("JWT")))
-                    );*/
+                    ));
         }
     }
 

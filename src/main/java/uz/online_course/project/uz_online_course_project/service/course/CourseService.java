@@ -1,6 +1,7 @@
 package uz.online_course.project.uz_online_course_project.service.course;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.online_course.project.uz_online_course_project.dto.CourseCreateDto;
@@ -34,6 +35,13 @@ public class CourseService implements ICourseService {
         Category category = categoryRepository.findById(courseCreateDto.getCategoryId()).orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
 
+        Course course = getCourse(courseCreateDto, category, instruct);
+
+        Course createdCourse = courseRepository.save(course);
+        return converseToDto(createdCourse);
+    }
+
+    private static @NotNull Course getCourse(CourseCreateDto courseCreateDto, Category category, User instruct) {
         Course course = new Course();
 
         course.setTitle(courseCreateDto.getTitle());
@@ -46,9 +54,7 @@ public class CourseService implements ICourseService {
         course.setLevel(courseCreateDto.getGeneralLevel());
         course.setCategory(category);
         course.setInstructor(instruct);
-
-        Course createdCourse = courseRepository.save(course);
-        return converseToDto(createdCourse);
+        return course;
     }
 
     @Override
