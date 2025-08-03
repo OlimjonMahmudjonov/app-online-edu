@@ -4,42 +4,30 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import uz.online_course.project.uz_online_course_project.entity.User;
-import uz.online_course.project.uz_online_course_project.enums.GeneralRoles;
-import uz.online_course.project.uz_online_course_project.enums.GeneralsStatus;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 
-public class CustomUserDetails  implements UserDetails {
-
-    private  String email ;
-    private  String password ;
-    private GeneralRoles role;
-    private GeneralsStatus status;
+public class CustomUserDetails implements UserDetails {
+    private final User user;
 
     public CustomUserDetails(User user) {
-        this.email = user.getEmail();
-        this.password = user.getPassword();
-        this.role = user.getRole();
-        this.status = user.getStatus();
+        this.user = user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-       List<SimpleGrantedAuthority> roles = new ArrayList<>();
-       roles.add(new SimpleGrantedAuthority(role.name()));
-       return roles;
+        return Collections.singletonList(new SimpleGrantedAuthority(user.getRole().name()));
     }
 
     @Override
     public String getPassword() {
-        return password;
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return email;
+        return user.getEmail();
     }
 
     @Override
@@ -49,7 +37,7 @@ public class CustomUserDetails  implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return status.equals(GeneralsStatus.ACTIVE);//
+        return true;
     }
 
     @Override

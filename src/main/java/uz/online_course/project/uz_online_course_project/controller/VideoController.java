@@ -3,6 +3,7 @@ package uz.online_course.project.uz_online_course_project.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.online_course.project.uz_online_course_project.dto.VideoCreate;
 import uz.online_course.project.uz_online_course_project.dto.VideoDto;
@@ -22,7 +23,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class VideoController {
     private final IVideoService videoService;
 
-
+    @PreAuthorize("hasAnyRole( 'INSTRUCTOR' ,'ADMIN')")
     @PostMapping
     public ResponseEntity<ApiResponse> createVideo(@RequestBody VideoCreate videoCreate) {
         try {
@@ -52,7 +53,7 @@ public class VideoController {
         return ResponseEntity.ok(new ApiResponse("Videos found successfully", videoDtos));
 
     }
-
+    @PreAuthorize("hasAnyRole( 'INSTRUCTOR' ,'ADMIN')")
     @DeleteMapping("delete/{id}")
     public ResponseEntity<ApiResponse> deleteVideoById(@PathVariable Long id) {
         try {
@@ -62,7 +63,7 @@ public class VideoController {
            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Video not found", null));
         }
     }
-
+    @PreAuthorize("hasAnyRole( 'INSTRUCTOR' ,'ADMIN')")
     @PutMapping("update/{id}")
     public ResponseEntity<ApiResponse> updateVideoResponse(@PathVariable Long id, @RequestBody VideoUpdate videoUpdate) {
         try {

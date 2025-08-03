@@ -18,6 +18,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @RestController
 @RequestMapping("/api/blog")
 @RequiredArgsConstructor
+
 public class BlogController {
     private final IBlogService blogService;
 
@@ -28,7 +29,7 @@ public class BlogController {
             BlogDto blogDto = blogService.getBlogById(id);
             return ResponseEntity.ok(new ApiResponse("Blog  get Id ", blogDto));
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Blog not found " , id));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Blog not found ", id));
         }
     }
 
@@ -56,6 +57,7 @@ public class BlogController {
         }
     }
 
+
     @GetMapping("/exist/{id}")
     public ResponseEntity<ApiResponse> existsById(@PathVariable Long id) {
         boolean exists = blogService.existsById(id);
@@ -77,8 +79,9 @@ public class BlogController {
         return ResponseEntity.ok(new ApiResponse("Blog  get Recent Blogs ", blogDtoList));
     }
 
+
     @PutMapping("/update/{id}")
-    public ResponseEntity<ApiResponse> updateBlogById(@PathVariable Long id, @Valid  @RequestBody BlogDtoCreate blogDto) {
+    public ResponseEntity<ApiResponse> updateBlogById(@PathVariable Long id, @Valid @RequestBody BlogDtoCreate blogDto) {
         try {
             BlogDto blogUpdate = blogService.updateBlogById(id, blogDto);
             return ResponseEntity.ok(new ApiResponse("Blog  update Id ", blogUpdate));
@@ -91,8 +94,9 @@ public class BlogController {
         }
     }
 
+
     @PostMapping
-    public ResponseEntity<ApiResponse> createBlog( @Valid @RequestBody BlogDtoCreate blogDtoCreate) {
+    public ResponseEntity<ApiResponse> createBlog(@Valid @RequestBody BlogDtoCreate blogDtoCreate) {
         try {
             BlogDto blogDto = blogService.createBlog(blogDtoCreate);
             return ResponseEntity.ok(new ApiResponse("Blog  create Id ", blogDto));

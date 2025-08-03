@@ -2,9 +2,11 @@ package uz.online_course.project.uz_online_course_project.service.user;
 
 import lombok.RequiredArgsConstructor;
 //import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.online_course.project.uz_online_course_project.dto.UserDto;
 import uz.online_course.project.uz_online_course_project.entity.User;
 import uz.online_course.project.uz_online_course_project.enums.GeneralsStatus;
@@ -20,6 +22,8 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
+
 public class UserService implements IUserService {
 
     private final UserRepository userRepository;
@@ -89,9 +93,9 @@ public class UserService implements IUserService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        user.setStatus(GeneralsStatus.INACTIVE);
-        user.setVisible(false);
-        userRepository.save(user);
+
+       userRepository.delete(user);
+
 
     }
 

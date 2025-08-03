@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.online_course.project.uz_online_course_project.dto.CreateUser;
 import uz.online_course.project.uz_online_course_project.dto.UpdateUser;
@@ -24,7 +25,7 @@ public class UserController {
 
     private final IUserService userService;
 
-
+    @PreAuthorize("hasAnyRole( 'INSTRUCTOR' ,'ADMIN')")
     @GetMapping("/get/{userId}")
     public ResponseEntity<ApiResponse> getUserById(@PathVariable Long userId) {
 
@@ -37,8 +38,8 @@ public class UserController {
             return ResponseEntity.status(500).body(new ApiResponse("Internal server error", null));
         }
     }
-
-    @PostMapping("/create")
+    @PreAuthorize("hasAnyRole()(,'STUDENT', 'INSTRUCTOR','ADMIN')")
+    @PostMapping("/register")
     public ResponseEntity<ApiResponse> register(@Valid @RequestBody CreateUser createUser) {
 
         try {
@@ -50,7 +51,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse(e.getMessage(), null));
         }
     }
-
+    @PreAuthorize("hasRole( 'ADMIN')")
     @PutMapping("/update/{userId}")
     public ResponseEntity<ApiResponse> updateUser(@PathVariable Long userId,@Valid @RequestBody UpdateUser updateUser) {
 
@@ -66,7 +67,7 @@ public class UserController {
         }
 
     }
-
+    @PreAuthorize("hasRole( 'ADMIN')")
     @DeleteMapping("/delete/{userId}")
     public  ResponseEntity<ApiResponse> deleteUser(@PathVariable Long userId) {
         try {
@@ -77,7 +78,7 @@ public class UserController {
         }
     }
 
-
+    @PreAuthorize("hasRole(,'ADMIN')")
     @GetMapping("/get/all")
     public ResponseEntity<ApiResponse> getUserAll (){
      List<UserDto > userDto =  userService.getAllUsers();

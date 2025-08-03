@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.online_course.project.uz_online_course_project.dto.LessonCreateDto;
 import uz.online_course.project.uz_online_course_project.dto.LessonDto;
@@ -21,6 +22,7 @@ import java.util.List;
 public class LessonController {
     private final ILessonService lessonService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse> deleteLessonById(@PathVariable Long id) {
         try {
@@ -31,6 +33,7 @@ public class LessonController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('INSTRUCTOR' ,'ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<ApiResponse> addLesson(@Valid @RequestBody LessonCreateDto lessonCreateDto) {
         try {
@@ -40,6 +43,7 @@ public class LessonController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse("Internal server error", null));
         }
     }
+
 
     @GetMapping("/get/{id}")
     public ResponseEntity<ApiResponse> getLessonById(@PathVariable Long id) {
@@ -51,6 +55,7 @@ public class LessonController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('INSTRUCTOR' ,'ADMIN')")
     @PutMapping("/update/{id}")
     public ResponseEntity<ApiResponse> updateLesson(@PathVariable Long id, @Valid @RequestBody LessonUpdateDto lessonUpdateDto) {
         try {
@@ -61,11 +66,13 @@ public class LessonController {
         }
     }
 
+
     @GetMapping("/get/all")
     public ResponseEntity<ApiResponse> getLessons() {
         List<LessonDto> lessons = lessonService.getLessons();
         return ResponseEntity.ok(new ApiResponse("Lessons retrieved successfully", lessons));
     }
+
 
     @GetMapping("/search/title")
     public ResponseEntity<ApiResponse> getLessonByTitle(@RequestParam String title) {
@@ -77,6 +84,7 @@ public class LessonController {
         }
     }
 
+
     @GetMapping("/course/{courseId}")
     public ResponseEntity<ApiResponse> getLessonsByCourseId(@PathVariable Long courseId) {
         try {
@@ -87,11 +95,13 @@ public class LessonController {
         }
     }
 
+
     @GetMapping("/course/{courseId}/order/{lessonOrder}")
     public ResponseEntity<ApiResponse> getLessonsByCourseIdAndOrder(@PathVariable Long courseId, @PathVariable Integer lessonOrder) {
         List<LessonDto> lessons = lessonService.getLessonsByCourseIdAndOrder(courseId, lessonOrder);
         return ResponseEntity.ok(new ApiResponse("Lessons retrieved successfully", lessons));
     }
+
 
     @GetMapping("/exists/title")
     public ResponseEntity<ApiResponse> existsByTitleAndCourseId(@RequestParam String title, @RequestParam Long courseId) {
@@ -102,6 +112,7 @@ public class LessonController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Lesson not found", null));
         }
     }
+
 
     @GetMapping("/exists/order")
     public ResponseEntity<ApiResponse> existsByOrderAndCourseId(@RequestParam Integer lessonOrder, @RequestParam Long courseId) {

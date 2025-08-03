@@ -3,6 +3,7 @@ package uz.online_course.project.uz_online_course_project.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.online_course.project.uz_online_course_project.dto.CategoryCreateDto;
 import uz.online_course.project.uz_online_course_project.dto.CategoryDto;
@@ -20,12 +21,13 @@ public class CategoryController {
 
     private final ICategoryService categoryService;
 
-    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/create")
     public ResponseEntity<ApiResponse> createCreateCategoryDto(@RequestBody CategoryCreateDto categoryCreateDto) {
         CategoryDto categoryDto = categoryService.createCreateCategoryDto(categoryCreateDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse(HttpStatus.CREATED.toString(), categoryDto));
     }
-
+    @PreAuthorize("hasRole( 'ADMIN')")
     @PutMapping("/update/{id}")
     public ResponseEntity<ApiResponse> createUpdateCategoryDto(@PathVariable Long id, @RequestBody CategoryCreateDto categoryCreateDto) {
         CategoryDto categoryDto = categoryService.createUpdateCategoryDto(id, categoryCreateDto);
@@ -51,7 +53,7 @@ public class CategoryController {
         List<CategoryDto> categoryDtos = categoryService.getAllCategoriesAndCourses();
         return ResponseEntity.ok(new ApiResponse("Categories created successfully", categoryDtos));
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<ApiResponse> deleteCategoryById(@PathVariable Long id) {
         try {

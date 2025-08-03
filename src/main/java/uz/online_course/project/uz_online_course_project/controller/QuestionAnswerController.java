@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.online_course.project.uz_online_course_project.dto.QuestionAnswerCreate;
 import uz.online_course.project.uz_online_course_project.dto.QuestionAnswerDto;
@@ -108,6 +109,7 @@ public class QuestionAnswerController {
         String message = exists ? "Question answer exists" : "Question answer does not exist";
         return ResponseEntity.ok(new ApiResponse(message, exists));
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse> deleteQuestionAnswerById(@PathVariable Long id) {

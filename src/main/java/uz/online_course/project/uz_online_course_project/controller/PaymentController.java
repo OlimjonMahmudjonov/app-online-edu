@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.online_course.project.uz_online_course_project.dto.PaymentCreateDto;
 import uz.online_course.project.uz_online_course_project.dto.PaymentDto;
@@ -22,6 +23,7 @@ public class PaymentController {
 
     private final IPaymentSerivce paymentService;
 
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR' ,'ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<ApiResponse> createPayment(@Valid @RequestBody PaymentCreateDto paymentCreateDto) {
         try {
@@ -33,6 +35,7 @@ public class PaymentController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR' ,'ADMIN')")
     @PutMapping("/update/{paymentId}")
     public ResponseEntity<ApiResponse> updatePayment(
             @PathVariable Long paymentId,
@@ -51,7 +54,7 @@ public class PaymentController {
             PaymentDto paymentDto = paymentService.getPaymentById(paymentId);
             return ResponseEntity.ok(new ApiResponse("Payment retrieved successfully", paymentDto));
         } catch (ResourceNotFoundException e) {
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Payment not found", e));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Payment not found", e));
         }
     }
 
@@ -61,9 +64,11 @@ public class PaymentController {
             List<PaymentDto> paymentDtos = paymentService.getPaymentsByUserId(userId);
             return ResponseEntity.ok(new ApiResponse("User payments retrieved successfully", paymentDtos));
         } catch (ResourceNotFoundException e) {
-return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Payment not found", e));        }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Payment not found", e));
+        }
     }
 
+    @PreAuthorize("hasAnyRole( 'INSTRUCTOR' ,'ADMIN')")
     @GetMapping("/course/{courseId}")
     public ResponseEntity<ApiResponse> getPaymentsByCourseId(@PathVariable Long courseId) {
         try {
@@ -71,18 +76,20 @@ return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Paymen
             return ResponseEntity.ok(new ApiResponse("Course payments retrieved successfully", paymentDtos));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Payment not found", e));
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
     }
 
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR' ,'ADMIN')")
     @GetMapping("/all")
     public ResponseEntity<ApiResponse> getAllPayments() {
         List<PaymentDto> paymentDtos = paymentService.getPaymentsByAll();
         return ResponseEntity.ok(new ApiResponse("All payments retrieved successfully", paymentDtos));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{paymentId}")
     public ResponseEntity<ApiResponse> deletePaymentById(@PathVariable Long paymentId) {
         boolean isDeleted = paymentService.deletePaymentById(paymentId);
@@ -94,6 +101,7 @@ return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Paymen
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/process/{paymentId}")
     public ResponseEntity<ApiResponse> processPayment(
             @PathVariable Long paymentId,
@@ -102,6 +110,7 @@ return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Paymen
         return ResponseEntity.ok(new ApiResponse("Payment processed successfully", paymentDto));
     }
 
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR' ,'ADMIN')")
     @GetMapping("/verify")
     public ResponseEntity<ApiResponse> verifyPayment(@RequestParam String transactionId) {
         boolean isVerified = paymentService.verifyPayment(transactionId);
@@ -109,7 +118,7 @@ return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Paymen
         return ResponseEntity.ok(new ApiResponse(message, isVerified));
     }
 
-
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR' ,'ADMIN')")
     @GetMapping("/status/{status}")
     public ResponseEntity<ApiResponse> getPaymentsByStatus(@PathVariable PayProgress status) {
         List<PaymentDto> allPayments = paymentService.getPaymentsByAll();
@@ -119,18 +128,21 @@ return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Paymen
         return ResponseEntity.ok(new ApiResponse("Payments by status retrieved successfully", filteredPayments));
     }
 
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR' ,'ADMIN')")
     @PatchMapping("/cancel/{paymentId}")
     public ResponseEntity<ApiResponse> cancelPayment(@PathVariable Long paymentId) {
         PaymentDto paymentDto = paymentService.updatePayment(paymentId, PayProgress.CANCELLED);
         return ResponseEntity.ok(new ApiResponse("Payment cancelled successfully", paymentDto));
     }
 
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR' ,'ADMIN')")
     @PatchMapping("/complete/{paymentId}")
     public ResponseEntity<ApiResponse> completePayment(@PathVariable Long paymentId) {
         PaymentDto paymentDto = paymentService.updatePayment(paymentId, PayProgress.COMPLETED);
         return ResponseEntity.ok(new ApiResponse("Payment completed successfully", paymentDto));
     }
 
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR' ,'ADMIN')")
     @PatchMapping("/fail/{paymentId}")
     public ResponseEntity<ApiResponse> failPayment(@PathVariable Long paymentId) {
         PaymentDto paymentDto = paymentService.updatePayment(paymentId, PayProgress.FAILED);

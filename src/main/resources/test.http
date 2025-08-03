@@ -1,1 +1,10 @@
-GET localhost:8080/api/blog/1
+POST http://localhost:8080/api/users/register
+Content-Type: application/json
+
+{
+  "username": "olimjontatu@gmail.com",
+  "email": "olimjontatu@gmail.com",
+  "password": "12345",
+  "role": "ROLE_STUDENT",
+  "status": "ACTIVE"
+}
