@@ -19,8 +19,7 @@ public class CourseCommentCreateDto {
     @NotNull(message = "Course ID is required")
     private Long courseId;
 
-    @NotNull(message = "Blog  ID is required")
-    private Long blogId;
+
 
 
 }

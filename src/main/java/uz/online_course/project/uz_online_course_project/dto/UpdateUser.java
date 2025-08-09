@@ -3,6 +3,7 @@ package uz.online_course.project.uz_online_course_project.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import uz.online_course.project.uz_online_course_project.enums.GeneralRoles;
@@ -29,10 +30,10 @@ public class UpdateUser {
     @NotEmpty(message = "General Role  cannot be empty")
     private GeneralRoles role;
 
-    @NotEmpty(message = "Visible cannot be empty")
+
     private Boolean visible;
 
-    @NotEmpty(message = "Telegram Chat Id  cannot be empty")
+
     private Long telegramChatId;
 
     @NotEmpty(message = "Telegram Chat Name  cannot be empty")

@@ -79,7 +79,7 @@ public class CourseCommentService implements ICourseComment {
 
     @Override
     public CourseCommentDto createCourseComment(CourseCommentCreateDto commentDto) {
-        if (commentDto.getCourseId() == null && commentDto.getBlogId() == null) {
+        if (commentDto.getCourseId() == null ) {
             throw new IllegalArgumentException("Either courseId or blogId must be provided");
         }
 
@@ -88,23 +88,19 @@ public class CourseCommentService implements ICourseComment {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + commentDto.getUserId()));
 
         Course course = null;
-        Blog blog = null;
+
 
         if (commentDto.getCourseId() != null) {
             course = courseRepository.findById(commentDto.getCourseId())
                     .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + commentDto.getCourseId()));
         }
 
-        if (commentDto.getBlogId() != null) {
-            blog = blogRepository.findById(commentDto.getBlogId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Blog not found with id: " + commentDto.getBlogId()));
-        }
+
 
         CourseComment comment = new CourseComment();
         comment.setContent(commentDto.getContent());
         comment.setUser(user);
         comment.setCourse(course);
-        comment.setBlog(blog);
         comment.setCreatedAt(LocalDateTime.now());
 
         CourseComment savedComment = commentRepository.save(comment);

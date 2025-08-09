@@ -1,6 +1,6 @@
 package uz.online_course.project.uz_online_course_project.service.course;
 
-
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import uz.online_course.project.uz_online_course_project.dto.CourseCreateDto;
 import uz.online_course.project.uz_online_course_project.dto.CourseDto;
@@ -20,21 +20,19 @@ public interface ICourseService {
 
     CourseDto getCourseById(Long codeId);
 
-    List<CourseDto> getAllCourses();
+    List<CourseDto> getAllCourses(Pageable pageable);
 
-    List<CourseDto> getAllCoursesByCategoryId(Long categoryId);
+    List<CourseDto> getAllCoursesByCategoryId(Long categoryId, Pageable pageable);
 
-   // List<CourseDto> getAllCoursesByCourseId(Long courseId);
+    List<CourseDto> getAllCoursesByInstructorId(Long instructorId, Pageable pageable);
 
-    List<CourseDto> getAllCoursesByInstructorId(Long instructorId);
+    List<CourseDto> getRecoursesIsFreeOrIsPayP(boolean isFreeOrIsPayP, Pageable pageable);
 
-    List<CourseDto> getRecoursesIsFreeOrIsPayP(boolean isFreeOrIsPayP);
+    List<CourseDto> getRecoursesByLevel(GeneralLevel generalLevel, Pageable pageable);
 
-    List<CourseDto> getRecoursesByLevel(GeneralLevel generalLevel);
+    List<CourseDto> getRecoursesByTitle(String title, Pageable pageable);
 
-    List<CourseDto> getRecoursesByTitle(String title);
-
-    List<CourseDto> getCourseWithDiscount();
+    List<CourseDto> getCourseWithDiscount(Pageable pageable);
 
     long getCoursesByInstructorId(Long instructorId);
 
@@ -43,6 +41,4 @@ public interface ICourseService {
     double getAverageRatingByCourseId(Long courseId);
 
     long getTotalCoursesCount();
-
-
 }

@@ -1,20 +1,15 @@
 package uz.online_course.project.uz_online_course_project.service.user;
 
 import lombok.RequiredArgsConstructor;
-//import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uz.online_course.project.uz_online_course_project.dto.CreateUser;
+import uz.online_course.project.uz_online_course_project.dto.UpdateUser;
 import uz.online_course.project.uz_online_course_project.dto.UserDto;
 import uz.online_course.project.uz_online_course_project.entity.User;
-import uz.online_course.project.uz_online_course_project.enums.GeneralsStatus;
 import uz.online_course.project.uz_online_course_project.excaption.AlreadyExistsException;
 import uz.online_course.project.uz_online_course_project.excaption.ResourceNotFoundException;
 import uz.online_course.project.uz_online_course_project.repository.UserRepository;
-import uz.online_course.project.uz_online_course_project.dto.CreateUser;
-import uz.online_course.project.uz_online_course_project.dto.UpdateUser;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,7 +22,7 @@ import java.util.stream.Collectors;
 public class UserService implements IUserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    //private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserDto getUserById(Long userId) {
@@ -50,7 +45,8 @@ public class UserService implements IUserService {
         User user = new User();
         user.setUsername(createUser.getUsername());
         user.setEmail(createUser.getEmail());
-        user.setPassword(passwordEncoder.encode(createUser.getPassword()));
+       // user.setPassword(passwordEncoder.encode(createUser.getPassword()));
+        user.setPassword(createUser.getPassword());
         user.setTelegramUserName(createUser.getTelegramUserName());
         user.setTelegramChatId(createUser.getTelegramChatId());
         user.setVisible(createUser.getVisible());
@@ -76,7 +72,8 @@ public class UserService implements IUserService {
         userById.setId(userdto.getId());
         userById.setUsername(userdto.getUsername());
         userById.setEmail(userdto.getEmail());
-        userById.setPassword(passwordEncoder.encode(userdto.getPassword()));
+       // userById.setPassword(passwordEncoder.encode(userdto.getPassword()));
+        userById.setPassword(userdto.getPassword());
         userById.setRole(userdto.getRole());
         userById.setTelegramUserName(userdto.getTelegramUserName());
         userById.setCreatedDate(LocalDateTime.now());
@@ -141,7 +138,8 @@ public class UserService implements IUserService {
             throw new IllegalArgumentException("Password cannot be empty");
         }
 
-        user.setPassword(passwordEncoder.encode(password));
+       // user.setPassword(passwordEncoder.encode(password));
+        user.setPassword(password);
         userRepository.save(user);
     }
 

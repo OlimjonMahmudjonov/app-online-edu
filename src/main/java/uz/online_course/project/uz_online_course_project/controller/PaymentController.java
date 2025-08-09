@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.online_course.project.uz_online_course_project.dto.PaymentCreateDto;
 import uz.online_course.project.uz_online_course_project.dto.PaymentDto;
@@ -23,7 +22,7 @@ public class PaymentController {
 
     private final IPaymentSerivce paymentService;
 
-    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR' ,'ADMIN')")
+
     @PostMapping("/create")
     public ResponseEntity<ApiResponse> createPayment(@Valid @RequestBody PaymentCreateDto paymentCreateDto) {
         try {
@@ -35,7 +34,7 @@ public class PaymentController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR' ,'ADMIN')")
+
     @PutMapping("/update/{paymentId}")
     public ResponseEntity<ApiResponse> updatePayment(
             @PathVariable Long paymentId,
@@ -68,7 +67,7 @@ public class PaymentController {
         }
     }
 
-    @PreAuthorize("hasAnyRole( 'INSTRUCTOR' ,'ADMIN')")
+
     @GetMapping("/course/{courseId}")
     public ResponseEntity<ApiResponse> getPaymentsByCourseId(@PathVariable Long courseId) {
         try {
@@ -82,14 +81,14 @@ public class PaymentController {
 
     }
 
-    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR' ,'ADMIN')")
+
     @GetMapping("/all")
     public ResponseEntity<ApiResponse> getAllPayments() {
         List<PaymentDto> paymentDtos = paymentService.getPaymentsByAll();
         return ResponseEntity.ok(new ApiResponse("All payments retrieved successfully", paymentDtos));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+
     @DeleteMapping("/delete/{paymentId}")
     public ResponseEntity<ApiResponse> deletePaymentById(@PathVariable Long paymentId) {
         boolean isDeleted = paymentService.deletePaymentById(paymentId);
@@ -101,7 +100,7 @@ public class PaymentController {
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+
     @PostMapping("/process/{paymentId}")
     public ResponseEntity<ApiResponse> processPayment(
             @PathVariable Long paymentId,
@@ -110,7 +109,7 @@ public class PaymentController {
         return ResponseEntity.ok(new ApiResponse("Payment processed successfully", paymentDto));
     }
 
-    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR' ,'ADMIN')")
+
     @GetMapping("/verify")
     public ResponseEntity<ApiResponse> verifyPayment(@RequestParam String transactionId) {
         boolean isVerified = paymentService.verifyPayment(transactionId);
@@ -118,7 +117,7 @@ public class PaymentController {
         return ResponseEntity.ok(new ApiResponse(message, isVerified));
     }
 
-    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR' ,'ADMIN')")
+
     @GetMapping("/status/{status}")
     public ResponseEntity<ApiResponse> getPaymentsByStatus(@PathVariable PayProgress status) {
         List<PaymentDto> allPayments = paymentService.getPaymentsByAll();
@@ -128,21 +127,21 @@ public class PaymentController {
         return ResponseEntity.ok(new ApiResponse("Payments by status retrieved successfully", filteredPayments));
     }
 
-    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR' ,'ADMIN')")
+
     @PatchMapping("/cancel/{paymentId}")
     public ResponseEntity<ApiResponse> cancelPayment(@PathVariable Long paymentId) {
         PaymentDto paymentDto = paymentService.updatePayment(paymentId, PayProgress.CANCELLED);
         return ResponseEntity.ok(new ApiResponse("Payment cancelled successfully", paymentDto));
     }
 
-    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR' ,'ADMIN')")
+
     @PatchMapping("/complete/{paymentId}")
     public ResponseEntity<ApiResponse> completePayment(@PathVariable Long paymentId) {
         PaymentDto paymentDto = paymentService.updatePayment(paymentId, PayProgress.COMPLETED);
         return ResponseEntity.ok(new ApiResponse("Payment completed successfully", paymentDto));
     }
 
-    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR' ,'ADMIN')")
+
     @PatchMapping("/fail/{paymentId}")
     public ResponseEntity<ApiResponse> failPayment(@PathVariable Long paymentId) {
         PaymentDto paymentDto = paymentService.updatePayment(paymentId, PayProgress.FAILED);

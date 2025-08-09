@@ -1,6 +1,8 @@
 package uz.online_course.project.uz_online_course_project.service.category;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.online_course.project.uz_online_course_project.dto.CategoryCreateDto;
@@ -22,7 +24,7 @@ public class CategoryService implements ICategoryService {
     @Override
     public CategoryDto createCreateCategoryDto(CategoryCreateDto categoryCreateDto) {
         if (existsCategoryName(categoryCreateDto.getName())) {
-            throw new AlreadyExistsException("Category name already exists" + categoryCreateDto.getName());
+            throw new AlreadyExistsException("Category name already exists: " + categoryCreateDto.getName());
         }
         Category category = new Category();
         category.setName(categoryCreateDto.getName());
@@ -33,10 +35,11 @@ public class CategoryService implements ICategoryService {
 
     @Override
     public CategoryDto createUpdateCategoryDto(Long id, CategoryCreateDto categoryCreateDto) {
-        Category category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category not found" + id));
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found: " + id));
 
         if (!category.getName().equals(categoryCreateDto.getName()) && existsCategoryName(categoryCreateDto.getName())) {
-            throw new AlreadyExistsException("Category name already exists" + categoryCreateDto.getName());
+            throw new AlreadyExistsException("Category name already exists: " + categoryCreateDto.getName());
         }
 
         category.setName(categoryCreateDto.getName());
@@ -48,24 +51,26 @@ public class CategoryService implements ICategoryService {
 
     @Override
     public CategoryDto getCategoryById(Long id) {
-        Category category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category not found" + id));
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found: " + id));
         return converseTodo(category);
-
     }
 
     @Override
-    public List<CategoryDto> getCategories() {
-        return categoryRepository.findAll().stream().map(this::converseTodo).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<CategoryDto> getAllCategoriesAndCourses() {
-        List<Category> categories = categoryRepository.findCategoriesWithCourses();
-        return categories.stream()
+    public List<CategoryDto> getCategories(Pageable pageable) {
+        Page<Category> categoryPage = categoryRepository.findAll(pageable);
+        return categoryPage.getContent().stream()
                 .map(this::converseTodo)
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<CategoryDto> getAllCategoriesAndCourses(Pageable pageable) {
+        Page<Category> categories = categoryRepository.findCategoriesWithCourses(pageable);
+        return categories.getContent().stream()
+                .map(this::converseTodo)
+                .collect(Collectors.toList());
+    }
 
     @Override
     @Transactional
@@ -73,14 +78,9 @@ public class CategoryService implements ICategoryService {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
 
-        // Kurslarni o‘chirib yuborish (orphanRemoval = true bo'lgani uchun yetarli)
         category.getCourses().clear();
-
         categoryRepository.delete(category);
     }
-
-
-
 
     @Override
     public boolean existsCategoryName(String name) {
@@ -105,7 +105,6 @@ public class CategoryService implements ICategoryService {
         categoryDto.setDescription(category.getDescription());
         if (category.getCourses() != null) {
             categoryDto.setCourseCount(category.getCourses().size());
-
         } else {
             categoryDto.setCourseCount(0);
         }

@@ -1,9 +1,10 @@
 package uz.online_course.project.uz_online_course_project.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.online_course.project.uz_online_course_project.dto.VideoCreate;
 import uz.online_course.project.uz_online_course_project.dto.VideoDto;
@@ -13,7 +14,9 @@ import uz.online_course.project.uz_online_course_project.excaption.ResourceNotFo
 import uz.online_course.project.uz_online_course_project.response.ApiResponse;
 import uz.online_course.project.uz_online_course_project.service.video.IVideoService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -23,19 +26,17 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class VideoController {
     private final IVideoService videoService;
 
-    @PreAuthorize("hasAnyRole( 'INSTRUCTOR' ,'ADMIN')")
     @PostMapping
     public ResponseEntity<ApiResponse> createVideo(@RequestBody VideoCreate videoCreate) {
         try {
             VideoDto videoDto = videoService.createVideo(videoCreate);
             return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse("Video created successfully", videoDto));
-        }  catch (ResourceNotFoundException e) {
+        } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
-        }catch (AlreadyExistsException e) {
+        } catch (AlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse(e.getMessage(), null));
         }
     }
-
 
     @GetMapping("/get/{id}")
     public ResponseEntity<ApiResponse> findVideoById(@PathVariable Long id) {
@@ -48,22 +49,24 @@ public class VideoController {
     }
 
     @GetMapping("/get/all")
-    public ResponseEntity<ApiResponse> getAllVideos() {
-        List<VideoDto> videoDtos = videoService.getAllVideos();
-        return ResponseEntity.ok(new ApiResponse("Videos found successfully", videoDtos));
-
+    public ResponseEntity<ApiResponse> getAllVideos(Pageable pageable) {
+        List<VideoDto> videoDtos = videoService.getAllVideos(pageable);
+        Map<String, Object> response = new HashMap<>();
+        response.put("videos", videoDtos);
+        response.put("totalItems", videoService.getAllCountTotal());
+        return ResponseEntity.ok(new ApiResponse("Videos found successfully", response));
     }
-    @PreAuthorize("hasAnyRole( 'INSTRUCTOR' ,'ADMIN')")
+
     @DeleteMapping("delete/{id}")
     public ResponseEntity<ApiResponse> deleteVideoById(@PathVariable Long id) {
         try {
             videoService.deleteVideoById(id);
             return ResponseEntity.ok(new ApiResponse("Video deleted successfully", null));
         } catch (ResourceNotFoundException e) {
-           return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Video not found", null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Video not found", null));
         }
     }
-    @PreAuthorize("hasAnyRole( 'INSTRUCTOR' ,'ADMIN')")
+
     @PutMapping("update/{id}")
     public ResponseEntity<ApiResponse> updateVideoResponse(@PathVariable Long id, @RequestBody VideoUpdate videoUpdate) {
         try {
@@ -101,6 +104,4 @@ public class VideoController {
         long count = videoService.getAllCountTotal();
         return ResponseEntity.ok(new ApiResponse("Videos found successfully", count));
     }
-
-
 }

@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.online_course.project.uz_online_course_project.dto.QuestionAnswerCreate;
 import uz.online_course.project.uz_online_course_project.dto.QuestionAnswerDto;

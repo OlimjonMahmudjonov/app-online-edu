@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.online_course.project.uz_online_course_project.dto.LessonCreateDto;
 import uz.online_course.project.uz_online_course_project.dto.LessonDto;
@@ -22,7 +21,7 @@ import java.util.List;
 public class LessonController {
     private final ILessonService lessonService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse> deleteLessonById(@PathVariable Long id) {
         try {
@@ -33,7 +32,7 @@ public class LessonController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('INSTRUCTOR' ,'ADMIN')")
+
     @PostMapping("/create")
     public ResponseEntity<ApiResponse> addLesson(@Valid @RequestBody LessonCreateDto lessonCreateDto) {
         try {
@@ -55,7 +54,7 @@ public class LessonController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('INSTRUCTOR' ,'ADMIN')")
+
     @PutMapping("/update/{id}")
     public ResponseEntity<ApiResponse> updateLesson(@PathVariable Long id, @Valid @RequestBody LessonUpdateDto lessonUpdateDto) {
         try {

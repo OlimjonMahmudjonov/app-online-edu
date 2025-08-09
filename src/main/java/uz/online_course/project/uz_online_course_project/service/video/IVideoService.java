@@ -1,5 +1,6 @@
 package uz.online_course.project.uz_online_course_project.service.video;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import uz.online_course.project.uz_online_course_project.dto.VideoCreate;
 import uz.online_course.project.uz_online_course_project.dto.VideoDto;
@@ -13,7 +14,7 @@ public interface IVideoService {
 
     VideoDto findVideoById(Long videoId);
 
-    List<VideoDto> getAllVideos();
+    List<VideoDto> getAllVideos( Pageable pageable);
 
 
     VideoDto updateVideo(Long id, VideoUpdate videoUpdate);

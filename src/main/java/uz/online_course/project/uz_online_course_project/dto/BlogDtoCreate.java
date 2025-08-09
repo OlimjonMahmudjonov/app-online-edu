@@ -13,15 +13,17 @@ import lombok.*;
 @NoArgsConstructor
 
 public class BlogDtoCreate {
-    @NotBlank(message = "title is not empty")
-    @Size( max = 300, message = " title length max = 300  sigh  ")
+
+
+    @NotBlank(message = "Title is required")
+    @Size(max = 500, message = "Title cannot exceed 500 characters")
     private String title;
 
-    @NotBlank(message = "content is not empty")
-    @Size( max = 300, message = " content length max = 300  sigh  ")
+    @NotBlank(message = "Content is required")
+    @Size(max = 5000, message = "Content cannot exceed 5000 characters")
     private String content;
 
-    @NotNull(message = "Author Id  is not null")
+    @NotNull(message = "Author ID is required")
     private Long authorId;
 
 }

@@ -1,5 +1,6 @@
 package uz.online_course.project.uz_online_course_project.service.category;
 
+import org.springframework.data.domain.Pageable;
 import uz.online_course.project.uz_online_course_project.dto.CategoryCreateDto;
 import uz.online_course.project.uz_online_course_project.dto.CategoryDto;
 
@@ -13,9 +14,9 @@ public interface ICategoryService {
 
     CategoryDto getCategoryById(Long id);
 
-    List<CategoryDto> getCategories();
+    List<CategoryDto> getCategories(Pageable pageable);
 
-    List<CategoryDto> getAllCategoriesAndCourses();
+    List<CategoryDto> getAllCategoriesAndCourses(Pageable pageable);
 
     void deleteCategoryById(Long id);
 

@@ -1,7 +1,9 @@
 package uz.online_course.project.uz_online_course_project.service.course;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.online_course.project.uz_online_course_project.dto.CourseCreateDto;
@@ -30,20 +32,18 @@ public class CourseService implements ICourseService {
 
     @Override
     public CourseDto createCourse(CourseCreateDto courseCreateDto) {
-        User instruct = userRepository.findById(courseCreateDto.getInstructorId()).orElseThrow(() -> new ResourceNotFoundException("Instructor not found"));
-
-        Category category = categoryRepository.findById(courseCreateDto.getCategoryId()).orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-
+        User instruct = userRepository.findById(courseCreateDto.getInstructorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Instructor not found: " + courseCreateDto.getInstructorId()));
+        Category category = categoryRepository.findById(courseCreateDto.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found: " + courseCreateDto.getCategoryId()));
 
         Course course = getCourse(courseCreateDto, category, instruct);
-
         Course createdCourse = courseRepository.save(course);
         return converseToDto(createdCourse);
     }
 
     private static @NotNull Course getCourse(CourseCreateDto courseCreateDto, Category category, User instruct) {
         Course course = new Course();
-
         course.setTitle(courseCreateDto.getTitle());
         course.setDescription(courseCreateDto.getDescription());
         course.setDiscountPrice(courseCreateDto.getDiscountPrice());
@@ -59,10 +59,12 @@ public class CourseService implements ICourseService {
 
     @Override
     public CourseDto updateCourse(Long id, CourseUpdateDto courseUpdateDto) {
-        Course course = courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + id));
 
         if (courseUpdateDto.getCategoryId() != null) {
-            Category category = categoryRepository.findById(courseUpdateDto.getCategoryId()).orElseThrow(() -> new ResourceNotFoundException("Category not found" + courseUpdateDto.getCategoryId()));
+            Category category = categoryRepository.findById(courseUpdateDto.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found: " + courseUpdateDto.getCategoryId()));
             course.setCategory(category);
         }
 
@@ -77,7 +79,6 @@ public class CourseService implements ICourseService {
 
         Course updatedCourse = courseRepository.save(course);
         return converseToDto(updatedCourse);
-
     }
 
     @Override
@@ -95,54 +96,53 @@ public class CourseService implements ICourseService {
         return true;
     }
 
-
     @Override
     public CourseDto getCourseById(Long codeId) {
-        Course course = courseRepository.findById(codeId).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        Course course = courseRepository.findById(codeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + codeId));
         return converseToDto(course);
     }
 
     @Override
-    public List<CourseDto> getAllCourses() {
-        List<Course> courses = courseRepository.findAll();
-        return courses.stream().map(this::converseToDto).collect(Collectors.toList());
+    public List<CourseDto> getAllCourses(Pageable pageable) {
+        Page<Course> courses = courseRepository.findAll(pageable);
+        return courses.getContent().stream().map(this::converseToDto).collect(Collectors.toList());
     }
 
     @Override
-    public List<CourseDto> getAllCoursesByCategoryId(Long categoryId) {
-        List<Course> courses = courseRepository.findByCategoryId(categoryId);
-        return courses.stream().map(this::converseToDto).collect(Collectors.toList());
+    public List<CourseDto> getAllCoursesByCategoryId(Long categoryId, Pageable pageable) {
+        Page<Course> courses = courseRepository.findByCategoryId(categoryId, pageable);
+        return courses.getContent().stream().map(this::converseToDto).collect(Collectors.toList());
     }
 
     @Override
-    public List<CourseDto> getAllCoursesByInstructorId(Long instructorId) {
-        List<Course> courses = courseRepository.findByInstructorId(instructorId);
-        return courses.stream().map(this::converseToDto).collect(Collectors.toList());
+    public List<CourseDto> getAllCoursesByInstructorId(Long instructorId, Pageable pageable) {
+        Page<Course> courses = courseRepository.findByInstructorId(instructorId, pageable);
+        return courses.getContent().stream().map(this::converseToDto).collect(Collectors.toList());
     }
 
     @Override
-    public List<CourseDto> getRecoursesIsFreeOrIsPayP(boolean isFreeOrIsPayP) {
-        List<Course> courses = courseRepository.findByIsFree(isFreeOrIsPayP);
-        return courses.stream().map(this::converseToDto).collect(Collectors.toList());
+    public List<CourseDto> getRecoursesIsFreeOrIsPayP(boolean isFreeOrIsPayP, Pageable pageable) {
+        Page<Course> courses = courseRepository.findByIsFree(isFreeOrIsPayP, pageable);
+        return courses.getContent().stream().map(this::converseToDto).collect(Collectors.toList());
     }
 
     @Override
-    public List<CourseDto> getRecoursesByLevel(GeneralLevel generalLevel) {
-        List<Course> courses = courseRepository.findByLevel(generalLevel);
-
-        return courses.stream().map(this::converseToDto).collect(Collectors.toList());
+    public List<CourseDto> getRecoursesByLevel(GeneralLevel generalLevel, Pageable pageable) {
+        Page<Course> courses = courseRepository.findByLevel(generalLevel, pageable);
+        return courses.getContent().stream().map(this::converseToDto).collect(Collectors.toList());
     }
 
     @Override
-    public List<CourseDto> getRecoursesByTitle(String title) {
-        List<Course> courses = courseRepository.findByTitleContainingIgnoreCase(title);
-        return courses.stream().map(this::converseToDto).collect(Collectors.toList());
+    public List<CourseDto> getRecoursesByTitle(String title, Pageable pageable) {
+        Page<Course> courses = courseRepository.findByTitleContainingIgnoreCase(title, pageable);
+        return courses.getContent().stream().map(this::converseToDto).collect(Collectors.toList());
     }
 
     @Override
-    public List<CourseDto> getCourseWithDiscount() {
-        List<Course> courses = courseRepository.findCoursesWithActiveDiscount(LocalDateTime.now());
-        return courses.stream().map(this::converseToDto).collect(Collectors.toList());
+    public List<CourseDto> getCourseWithDiscount(Pageable pageable) {
+        Page<Course> courses = courseRepository.findCoursesWithActiveDiscount(LocalDateTime.now(), pageable);
+        return courses.getContent().stream().map(this::converseToDto).collect(Collectors.toList());
     }
 
     @Override
@@ -168,7 +168,6 @@ public class CourseService implements ICourseService {
 
     private CourseDto converseToDto(Course course) {
         CourseDto courseDto = new CourseDto();
-
         courseDto.setId(course.getId());
         courseDto.setTitle(course.getTitle());
         courseDto.setDescription(course.getDescription());
@@ -197,15 +196,13 @@ public class CourseService implements ICourseService {
         courseDto.setCurrentPrice(getCurrentPrice(course));
         courseDto.setHasActiveDiscount(hasActiveDiscount(course));
 
-
         return courseDto;
     }
 
     private boolean hasActiveDiscount(Course course) {
-
         return course.getDiscountPrice() != null && course.getDiscountEndDate() != null
-                && course.getDiscountEndDate().isAfter(LocalDateTime.now()) &&
-                course.getDiscountPrice() < course.getOriginalPrice();
+                && course.getDiscountEndDate().isAfter(LocalDateTime.now())
+                && course.getDiscountPrice() < course.getOriginalPrice();
     }
 
     private Double getCurrentPrice(Course course) {
